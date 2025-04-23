@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        connect-src
+          'self'
+          https://*.clarity.ms
+          https://script.google.com
+          https://script.googleusercontent.com
+        ;
+        frame-src
+          'self'
+          https://platform.twitter.com
+        ;
+        img-src
+          'self'
+          https://i.gyazo.com
+        ;
+        script-src
+          'self'
+          https://platform.twitter.com
+          https://www.clarity.ms
+        ;
+        style-src
+          'self'
+          'unsafe-inline'
+        ;
+      "
+    />
+
+    <meta
+      name="description"
+      content="マツボックリが落ちてる写真を撮って遊ぼう。"
+    />
+    <meta
+      property="og:image"
+      content="https://pinecone.hata6502.com/favicon.png"
+    />
+    <meta property="og:title" content="マツボックリスイーパー" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pinecone.hata6502.com/" />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="dist/index.css" rel="stylesheet" />
+
+    <title>マツボックリスイーパー</title>
+  </head>
+  <body>
+    <script
+      src="https://platform.twitter.com/widgets.js"
+      charset="utf-8"
+    ></script>
+    <script type="module" src="dist/index.js"></script>
+  </body>
+</html>
