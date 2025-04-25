@@ -17,7 +17,9 @@
     "build:js": "esbuild src/index.tsx --outfile=public/dist/index.js --bundle --format=esm --minify",
     "fix": "prettier --write .",
     "start": "http-server -c-1 public",
-    "test": "prettier --check . && tsc --noEmit",
+    "test": "run-s test:*",
+    "test:format": "prettier --check .",
+    "test:type": "tsc --noEmit",
     "watch": "run-p 'build:** -- --watch' start"
   },
   "devDependencies": {
