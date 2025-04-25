@@ -22,6 +22,8 @@ interface Cell {
 }
 
 export const Minesweeper: FunctionComponent = () => {
+  const [imageURL, setImageURL] = useState<string>();
+  const [imageData, setImageData] = useState<ImageData>();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [mineRatio, setMineRatio] = useState(0.125);
   const [stopwatch, setStopwatch] = useState(0);
@@ -80,15 +82,13 @@ export const Minesweeper: FunctionComponent = () => {
     );
 
     for (const [columnIndex, rowIndex] of toShuffled(
-      board.flatMap((row, rowIndex) =>
-        row.map((_cell, columnIndex) => [columnIndex, rowIndex] as const),
-      ),
+      getMineCandidates(size, imageData),
     ).slice(0, Math.round(size ** 2 * mineRatio))) {
       board[rowIndex][columnIndex].mineIncluded = true;
     }
 
     setBoard(board);
-  }, [difficulty, mineRatio]);
+  }, [difficulty, imageData, mineRatio]);
 
   useLayoutEffect(() => {
     reset();
@@ -122,6 +122,30 @@ export const Minesweeper: FunctionComponent = () => {
     }
   }, [state, started]);
 
+  const handleImageInputChange: ChangeEventHandler<HTMLInputElement> = async (
+    event,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setImageURL(undefined);
+      setImageData(undefined);
+      return;
+    }
+
+    setImageURL(URL.createObjectURL(file));
+
+    const imageBitmap = await createImageBitmap(file);
+    const canvas = document.createElement("canvas");
+    canvas.width = imageBitmap.width;
+    canvas.height = imageBitmap.height;
+    const canvasContext = canvas.getContext("2d");
+    if (!canvasContext) {
+      throw new Error("context is null");
+    }
+    canvasContext.drawImage(imageBitmap, 0, 0);
+    setImageData(canvasContext.getImageData(0, 0, canvas.width, canvas.height));
+  };
+
   const handleMineRatioInputChange: ChangeEventHandler<HTMLInputElement> = (
     event,
   ) => {
@@ -135,29 +159,35 @@ export const Minesweeper: FunctionComponent = () => {
   const handleShareButtonClick = () => {};
 
   return (
-    <div className="space-y-6 flex flex-col items-center">
-      <p className="text-lg text-neutral-700 border-l-4 border-neutral-300 pl-3 py-1">マツボックリが落ちてる写真を撮って遊ぼう。</p>
+    <div className="flex flex-col items-center space-y-6">
+      <p>マツボックリが落ちてる写真をもとに爆弾🌰を配置します。</p>
+      <input type="file" accept="image/*" onChange={handleImageInputChange} />
+      {imageURL && <img alt="" src={imageURL} />}
 
-      <div className="space-y-4 flex flex-col items-center w-full">
-        <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex w-full flex-col items-center space-y-4">
+        <div className="flex flex-wrap justify-center gap-2">
           {difficulties.map((difficultyOption) => {
             const handleClick = () => {
               setDifficulty(difficultyOption);
             };
 
-            const difficultyText = { easy: "小さめ", normal: "ふつう", hard: "大規模" }[difficultyOption];
+            const difficultyText = {
+              easy: "小さめ",
+              normal: "ふつう",
+              hard: "大規模",
+            }[difficultyOption];
             const isActive = difficultyOption === difficulty;
 
             return (
-              <button 
-                key={difficultyOption} 
-                type="button" 
+              <button
+                key={difficultyOption}
+                type="button"
                 onClick={handleClick}
                 className={clsx(
-                  "px-4 py-2 rounded-md text-sm font-medium border shadow-sm",
-                  isActive 
-                    ? "border-neutral-400 bg-neutral-100 text-neutral-800" 
-                    : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                  "rounded-md border px-4 py-2 text-sm font-medium shadow-sm",
+                  isActive
+                    ? "border-neutral-400 bg-neutral-100 text-neutral-800"
+                    : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50",
                 )}
               >
                 {difficultyText}
@@ -166,89 +196,93 @@ export const Minesweeper: FunctionComponent = () => {
           })}
         </div>
 
-        <div className="max-w-md w-64">
-          <label className="block text-sm font-medium text-neutral-700 mb-1 text-center">
+        <div className="w-64 max-w-md">
+          <label className="mb-1 block text-center text-sm font-medium text-neutral-700">
             マツボックリの量
           </label>
           <input
             type="range"
-            min={0}
-            max={1}
+            min={0.03125}
+            max={0.96875}
             step={0.03125}
             value={mineRatio}
             onChange={handleMineRatioInputChange}
-            className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer"
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-200"
           />
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-0 inline-block mx-auto">
-          <div className="relative py-2 px-4 rounded-t-md bg-neutral-50 border border-neutral-200 border-b-0 font-mono">
-            <div className="flex justify-between items-center">
+        <div className="mx-auto inline-block space-y-0">
+          <div className="relative rounded-t-md border border-b-0 border-neutral-200 bg-neutral-50 px-4 py-2 font-mono">
+            <div className="flex items-center justify-between">
               <div className="flex gap-x-4">
                 <span className="flex items-center gap-1 text-neutral-700">
-                  <span className="text-lg">🌰</span> {mineCount.toString().padStart(2, '0')}個
+                  <span className="text-lg">🌰</span>{" "}
+                  {mineCount.toString().padStart(2, "0")}個
                 </span>
                 <span className="flex items-center gap-1 text-neutral-700">
-                  <span className="text-lg">🌲</span> {flagCount.toString().padStart(2, '0')}個{flagCount <= mineCount ? "" : "🤔"}
+                  <span className="text-lg">🌲</span>{" "}
+                  {flagCount.toString().padStart(2, "0")}個
+                  {flagCount <= mineCount ? "" : "🤔"}
                 </span>
               </div>
-  
+
               <div className="flex items-center gap-1 text-neutral-700">
-                <span className="text-lg">⏱</span> {stopwatch.toString().padStart(3, '0')}秒
+                <span className="text-lg">⏱</span>{" "}
+                {stopwatch.toString().padStart(3, "0")}秒
               </div>
             </div>
-            
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">
+
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-2xl">
               <Emotion state={state} progress={progress} />
             </div>
           </div>
-  
-          <div className="p-2 rounded-b-md bg-neutral-50 border border-neutral-200 border-t-0">
+
+          <div className="rounded-b-md border border-t-0 border-neutral-200 bg-neutral-50 p-2">
             <div className="grid gap-1">
               {board.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex gap-1">
                   {row.map((cell, columnIndex) => {
-                  switch (cell.state) {
-                    case "hidden": {
-                      return (
-                        <HiddenCell
-                          key={columnIndex}
-                          rowIndex={rowIndex}
-                          columnIndex={columnIndex}
-                          setBoard={setBoard}
-                        />
-                      );
-                    }
-  
-                    case "revealed": {
-                      return (
-                        <RevealedCell
-                          key={columnIndex}
-                          board={board}
-                          rowIndex={rowIndex}
-                          columnIndex={columnIndex}
-                          setBoard={setBoard}
-                        />
-                      );
-                    }
-  
-                    case "flagged": {
-                      return (
-                        <FlaggedCell
-                          key={columnIndex}
-                          state={state}
-                          cell={cell}
-                        />
-                      );
-                    }
-  
-                    default: {
-                      throw new Error(
-                        `Unknown cell state: ${cell.state satisfies never}`,
-                      );
-                    }
+                    switch (cell.state) {
+                      case "hidden": {
+                        return (
+                          <HiddenCell
+                            key={columnIndex}
+                            rowIndex={rowIndex}
+                            columnIndex={columnIndex}
+                            setBoard={setBoard}
+                          />
+                        );
+                      }
+
+                      case "revealed": {
+                        return (
+                          <RevealedCell
+                            key={columnIndex}
+                            board={board}
+                            rowIndex={rowIndex}
+                            columnIndex={columnIndex}
+                            setBoard={setBoard}
+                          />
+                        );
+                      }
+
+                      case "flagged": {
+                        return (
+                          <FlaggedCell
+                            key={columnIndex}
+                            state={state}
+                            cell={cell}
+                          />
+                        );
+                      }
+
+                      default: {
+                        throw new Error(
+                          `Unknown cell state: ${cell.state satisfies never}`,
+                        );
+                      }
                     }
                   })}
                 </div>
@@ -260,14 +294,14 @@ export const Minesweeper: FunctionComponent = () => {
         {state !== "playing" && (
           <div className="mx-auto text-center">
             {state === "completed" ? (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-md shadow-md inline-block">
-                <p className="font-bold text-xl">クリア！</p>
+              <div className="inline-block rounded-md border border-green-400 bg-green-100 px-6 py-4 text-green-700 shadow-md">
+                <p className="text-xl font-bold">クリア！</p>
                 <p className="text-lg">素晴らしいマツボックリ探索でした！</p>
                 <p className="text-lg">タイム {stopwatch}秒</p>
               </div>
             ) : (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-md shadow-md inline-block">
-                <p className="font-bold text-xl">ゲームオーバー</p>
+              <div className="inline-block rounded-md border border-red-400 bg-red-100 px-6 py-4 text-red-700 shadow-md">
+                <p className="text-xl font-bold">ゲームオーバー</p>
                 <p className="text-lg">マツボックリに当たってしまいました</p>
               </div>
             )}
@@ -275,15 +309,15 @@ export const Minesweeper: FunctionComponent = () => {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-3 mt-4 justify-center">
-        <button 
-          type="button" 
+      <div className="mt-4 flex flex-wrap justify-center gap-3">
+        <button
+          type="button"
           onClick={handleRetryButton}
           className={clsx(
             "inline-flex items-center justify-center gap-x-2 rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
             state !== "playing"
               ? "bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:outline-neutral-900"
-              : "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50 focus-visible:outline-neutral-500"
+              : "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 focus-visible:outline-neutral-500",
           )}
         >
           {state !== "playing" ? "もう一度遊ぶ" : "やり直す"}
@@ -293,7 +327,10 @@ export const Minesweeper: FunctionComponent = () => {
           href={`https://twitter.com/intent/tweet?${new URLSearchParams({
             hashtags: "マツボックリスイーパー",
             url: "https://pinecone.hata6502.com/",
-            text: state === "completed" ? `マツボックリスイーパーをクリアしました！タイム: ${stopwatch}秒` : "マツボックリスイーパーで遊んでいます"
+            text:
+              state === "completed"
+                ? `マツボックリスイーパーをクリアしました！タイム: ${stopwatch}秒`
+                : "マツボックリスイーパーで遊んでいます",
           })}`}
           target="_blank"
           className="inline-flex items-center justify-center gap-x-2 rounded-md bg-neutral-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
@@ -304,13 +341,36 @@ export const Minesweeper: FunctionComponent = () => {
         </a>
       </div>
 
-      <p className="text-sm text-neutral-500 pt-4 text-center">
+      <p className="pt-4 text-center text-sm text-neutral-500">
         #マツボックリスイーパー
         タグ付きでXにポストすると、このサイトに掲載されることがあります。
       </p>
     </div>
   );
 };
+
+const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
+  [...Array(size).keys()].flatMap((rowIndex) =>
+    [...Array(size).keys()].flatMap((columnIndex): [number, number][] => {
+      if (!imageData) {
+        return [[columnIndex, rowIndex]];
+      }
+
+      const x = Math.floor(
+        ((columnIndex + Math.random()) / size) * imageData.width,
+      );
+      const y = Math.floor(
+        ((rowIndex + Math.random()) / size) * imageData.height,
+      );
+      const index = (y * imageData.width + x) * 4;
+      const [r, g, b] = imageData.data.slice(index, index + 3);
+
+      const grayscale = Math.round(r * 0.2126 + g * 0.7152 + b * 0.0722);
+      return [...Array(Math.floor(((255 - grayscale) / 256) * 16)).keys()].map(
+        () => [columnIndex, rowIndex],
+      );
+    }),
+  );
 
 function shuffle<Type>(array: Type[]) {
   for (let from = array.length - 1; from; from--) {
@@ -353,7 +413,8 @@ const Emotion: FunctionComponent<{
   }
 };
 
-const cellClassName = "w-10 h-10 rounded-md border border-neutral-200 shadow-sm flex items-center justify-center text-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500";
+const cellClassName =
+  "w-10 h-10 rounded-md border border-neutral-200 shadow-sm flex items-center justify-center text-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500";
 
 const HiddenCell: FunctionComponent<{
   rowIndex: number;
@@ -374,9 +435,9 @@ const HiddenCell: FunctionComponent<{
   };
 
   return (
-    <button 
-      type="button" 
-      onClick={handleClick} 
+    <button
+      type="button"
+      onClick={handleClick}
       className={clsx(cellClassName, "bg-neutral-200 hover:bg-neutral-300")}
     />
   );
@@ -390,7 +451,11 @@ const RevealedCell: FunctionComponent<{
 }> = ({ board, rowIndex, columnIndex, setBoard }) => {
   if (board[rowIndex][columnIndex].mineIncluded) {
     return (
-      <button type="button" disabled className={clsx(cellClassName, "bg-red-100")}>
+      <button
+        type="button"
+        disabled
+        className={clsx(cellClassName, "bg-red-100")}
+      >
         🌰
       </button>
     );
@@ -435,8 +500,7 @@ const RevealedCell: FunctionComponent<{
     });
   }
 
-  // マインスイーパーで定番の色付け
-  const colorClass = {
+  const colorClassName = {
     0: "bg-neutral-50 text-neutral-400",
     1: "bg-blue-50 text-blue-600",
     2: "bg-green-50 text-green-600",
@@ -446,16 +510,13 @@ const RevealedCell: FunctionComponent<{
     6: "bg-pink-50 text-pink-700",
     7: "bg-purple-50 text-purple-700",
     8: "bg-cyan-50 text-cyan-800",
-  }[adjacentMineCount] || "bg-neutral-50";
+  }[adjacentMineCount];
 
   return (
-    <button 
-      type="button" 
-      disabled 
-      className={clsx(
-        cellClassName, 
-        colorClass
-      )}
+    <button
+      type="button"
+      disabled
+      className={clsx(cellClassName, colorClassName)}
     >
       {adjacentMineCount || ""}
     </button>
@@ -470,7 +531,10 @@ const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
     case "gameOver": {
       if (cell.mineIncluded) {
         return (
-          <button type="button" className={clsx(cellClassName, "bg-orange-100")}>
+          <button
+            type="button"
+            className={clsx(cellClassName, "bg-orange-100")}
+          >
             🤔
           </button>
         );
