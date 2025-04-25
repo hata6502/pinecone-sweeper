@@ -12,12 +12,13 @@
   },
   "homepage": "https://github.com/hata6502/pinecone-sweeper#readme",
   "scripts": {
-    "dev": "run-p dev:*",
-    "dev:css": "npx @tailwindcss/cli -i src/index.css -o public/dist/index.css --minify --watch",
-    "dev:js": "esbuild src/index.tsx --outfile=public/dist/index.js --bundle --format=esm --minify --watch",
-    "dev:server": "http-server -c-1 public",
+    "build": "run-p build:*",
+    "build:css": "npx @tailwindcss/cli -i src/index.css -o public/dist/index.css --minify",
+    "build:js": "esbuild src/index.tsx --outfile=public/dist/index.js --bundle --format=esm --minify",
     "fix": "prettier --write .",
-    "test": "prettier --check . && tsc --noEmit"
+    "start": "http-server -c-1 public",
+    "test": "prettier --check . && tsc --noEmit",
+    "watch": "run-p 'build:** -- --watch' start"
   },
   "devDependencies": {
     "@headlessui/react": "^2.2.2",

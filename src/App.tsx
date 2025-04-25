@@ -23,8 +23,7 @@ const tweetIDsURL =
   "https://script.google.com/macros/s/AKfycbx1Lec0RXfLou1Ixz3-hg6lFHoQdkTDSCFhtYIwQ9_OyWx36f3JYIxGdia9kLdx4DYe/exec";
 
 export const App: FunctionComponent = () => {
-  const handleShareButtonClick = () => {
-  };
+  const handleShareButtonClick = () => {};
 
   return (
     <div className="mx-auto mb-16 max-w-4xl bg-white px-8">
@@ -121,7 +120,6 @@ const fetcher = async (url: string) => {
   }
   return response.json();
 };
-
 
 const Tweets: FunctionComponent = () => {
   const { data: tweetIDs } = useSWR<string[]>(tweetIDsURL, fetcher);
