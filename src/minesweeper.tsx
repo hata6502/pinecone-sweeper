@@ -2,34 +2,17 @@ import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import {
   ChangeEventHandler,
-  Dispatch,
   FunctionComponent,
-  SetStateAction,
   useCallback,
   useEffect,
   useLayoutEffect,
   useState,
 } from "react";
 
-const difficulties = ["easy", "normal", "hard"] as const;
-type Difficulty = (typeof difficulties)[number];
+import { CellState, Cell } from "./cell";
+import { toShuffled } from "./shuffle";
 
-type State = "gameOver" | "completed" | "playing";
-
-interface Cell {
-  state: "hidden" | "revealed" | "flagged";
-  mineIncluded: boolean;
-}
-
-const buttonClasses = {
-  primary:
-    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
-  secondary:
-    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm border border-zinc-300 bg-white hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500",
-  option: "rounded-lg border px-4 py-2 text-sm font-medium shadow-sm",
-  optionActive: "border-zinc-400 bg-zinc-100 text-zinc-800",
-  optionInactive: "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50",
-};
+export type MinesweeperState = ReturnType<typeof getMinesweeperState>;
 
 export const Minesweeper: FunctionComponent = () => {
   const [imageURL, setImageURL] = useState<string>();
@@ -38,26 +21,8 @@ export const Minesweeper: FunctionComponent = () => {
   const [mineRatio, setMineRatio] = useState(0.125);
   const [stopwatch, setStopwatch] = useState(0);
 
-  const [board, setBoard] = useState<Cell[][]>([]);
-
-  const state = board
-    .flat()
-    .some(
-      (cell) =>
-        cell.mineIncluded &&
-        { hidden: false, revealed: true, flagged: false }[cell.state],
-    )
-    ? "gameOver"
-    : board.flat().every(
-          (cell) =>
-            ({
-              hidden: cell.mineIncluded,
-              revealed: true,
-              flagged: cell.mineIncluded,
-            })[cell.state],
-        )
-      ? "completed"
-      : "playing";
+  const [board, setBoard] = useState<CellState[][]>([]);
+  const minesweeperState = getMinesweeperState(board);
 
   const mineCount = board
     .flat()
@@ -105,7 +70,7 @@ export const Minesweeper: FunctionComponent = () => {
   }, [reset]);
 
   useEffect(() => {
-    switch (state) {
+    switch (minesweeperState) {
       case "gameOver":
       case "completed": {
         return;
@@ -127,10 +92,12 @@ export const Minesweeper: FunctionComponent = () => {
       }
 
       default: {
-        throw new Error(`Unknown game state: ${state satisfies never}`);
+        throw new Error(
+          `Unknown minesweeperState: ${minesweeperState satisfies never}`,
+        );
       }
     }
-  }, [state, started]);
+  }, [minesweeperState, started]);
 
   const handleImageInputChange: ChangeEventHandler<HTMLInputElement> = async (
     event,
@@ -162,12 +129,6 @@ export const Minesweeper: FunctionComponent = () => {
     setMineRatio(Number(event.target.value));
   };
 
-  const handleRetryButton = () => {
-    reset();
-  };
-
-  const handleShareButtonClick = () => {};
-
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center space-y-8">
       <div className="text-center">
@@ -185,7 +146,7 @@ export const Minesweeper: FunctionComponent = () => {
             id="image-upload"
             className="hidden"
           />
-          <label htmlFor="image-upload" className={buttonClasses.secondary}>
+          <label htmlFor="image-upload" className={buttonClassNames.secondary}>
             写真を選択
           </label>
         </div>
@@ -208,7 +169,7 @@ export const Minesweeper: FunctionComponent = () => {
                 };
 
                 const difficultyText = {
-                  easy: "小さめ",
+                  easy: "プチ",
                   normal: "ふつう",
                   hard: "大規模",
                 }[difficultyOption];
@@ -220,10 +181,10 @@ export const Minesweeper: FunctionComponent = () => {
                     type="button"
                     onClick={handleClick}
                     className={clsx(
-                      buttonClasses.option,
+                      buttonClassNames.option,
                       isActive
-                        ? buttonClasses.optionActive
-                        : buttonClasses.optionInactive,
+                        ? buttonClassNames.optionActive
+                        : buttonClassNames.optionInactive,
                     )}
                   >
                     {difficultyText}
@@ -273,111 +234,41 @@ export const Minesweeper: FunctionComponent = () => {
           </div>
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-2xl">
-            <Emotion state={state} progress={progress} />
+            <Emotion minesweeperState={minesweeperState} progress={progress} />
           </div>
         </div>
 
-        <div className="bg-zinc-50 p-4">
-          <div
-            className="overflow-auto"
-            style={{ maxHeight: "80vh", maxWidth: "100%" }}
-          >
-            <div className="flex min-w-fit justify-center">
-              <div className="grid gap-1">
-                {board.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex gap-1">
-                    {row.map((cell, columnIndex) => {
-                      switch (cell.state) {
-                        case "hidden": {
-                          return (
-                            <HiddenCell
-                              key={columnIndex}
-                              rowIndex={rowIndex}
-                              columnIndex={columnIndex}
-                              setBoard={setBoard}
-                            />
-                          );
-                        }
-
-                        case "revealed": {
-                          return (
-                            <RevealedCell
-                              key={columnIndex}
-                              board={board}
-                              rowIndex={rowIndex}
-                              columnIndex={columnIndex}
-                              setBoard={setBoard}
-                            />
-                          );
-                        }
-
-                        case "flagged": {
-                          return (
-                            <FlaggedCell
-                              key={columnIndex}
-                              state={state}
-                              cell={cell}
-                            />
-                          );
-                        }
-
-                        default: {
-                          throw new Error(
-                            `Unknown cell state: ${cell.state satisfies never}`,
-                          );
-                        }
-                      }
-                    })}
-                  </div>
-                ))}
-              </div>
+        <div className="flex flex-col items-center-safe gap-1 overflow-auto bg-zinc-50 p-4">
+          {board.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex gap-1">
+              {row.map((cell, columnIndex) => (
+                <Cell
+                  key={columnIndex}
+                  minesweeperState={minesweeperState}
+                  board={board}
+                  rowIndex={rowIndex}
+                  columnIndex={columnIndex}
+                  cell={cell}
+                  setBoard={setBoard}
+                />
+              ))}
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      {state !== "playing" && (
-        <div className="mx-auto w-full max-w-md text-center">
-          {state === "completed" ? (
-            <div className="rounded-xl border border-green-100 bg-green-50 px-6 py-4 text-green-800 shadow-sm">
-              <p className="mb-2 text-xl font-bold">クリア！</p>
-              <p className="text-base">素晴らしいマツボックリ探索でした！</p>
-              <p className="text-base">タイム {stopwatch}秒</p>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-red-800 shadow-sm">
-              <p className="mb-2 text-xl font-bold">ゲームオーバー</p>
-              <p className="text-base">マツボックリに当たってしまいました</p>
-            </div>
-          )}
-        </div>
-      )}
+      <Result minesweeperState={minesweeperState} stopwatch={stopwatch} />
 
       <div className="flex flex-wrap justify-center gap-3">
-        <button
-          type="button"
-          onClick={handleRetryButton}
-          className={
-            state !== "playing"
-              ? buttonClasses.primary
-              : buttonClasses.secondary
-          }
-        >
-          {state !== "playing" ? "もう一度遊ぶ" : "やり直す"}
-        </button>
+        <RetryButton minesweeperState={minesweeperState} reset={reset} />
 
         <a
           href={`https://twitter.com/intent/tweet?${new URLSearchParams({
             hashtags: "マツボックリスイーパー",
             url: "https://pinecone.hata6502.com/",
-            text:
-              state === "completed"
-                ? `マツボックリスイーパーをクリアしました！タイム: ${stopwatch}秒`
-                : "マツボックリスイーパーで遊んでいます",
           })}`}
           target="_blank"
-          className={clsx(buttonClasses.primary, "gap-x-2")}
-          onClick={handleShareButtonClick}
+          className={clsx(buttonClassNames.primary, "gap-x-2")}
         >
           Xにポスト
           <ShareIcon className="h-5 w-5" aria-hidden="true" />
@@ -390,6 +281,38 @@ export const Minesweeper: FunctionComponent = () => {
       </p>
     </div>
   );
+};
+
+const difficulties = ["easy", "normal", "hard"] as const;
+type Difficulty = (typeof difficulties)[number];
+
+const getMinesweeperState = (board: CellState[][]) => {
+  if (
+    board
+      .flat()
+      .some(
+        (cell) =>
+          cell.mineIncluded &&
+          { hidden: false, revealed: true, flagged: false }[cell.state],
+      )
+  ) {
+    return "gameOver";
+  }
+
+  if (
+    board.flat().every(
+      (cell) =>
+        ({
+          hidden: cell.mineIncluded,
+          revealed: true,
+          flagged: cell.mineIncluded,
+        })[cell.state],
+    )
+  ) {
+    return "completed";
+  }
+
+  return "playing";
 };
 
 const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
@@ -415,23 +338,11 @@ const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
     }),
   );
 
-function shuffle<Type>(array: Type[]) {
-  for (let from = array.length - 1; from; from--) {
-    const to = Math.floor(Math.random() * (from + 1));
-    [array[from], array[to]] = [array[to], array[from]];
-  }
-  return array;
-}
-
-function toShuffled<Type>(array: Type[]) {
-  return shuffle([...array]);
-}
-
 const Emotion: FunctionComponent<{
-  state: State;
+  minesweeperState: MinesweeperState;
   progress: number;
-}> = ({ state, progress }) => {
-  switch (state) {
+}> = ({ minesweeperState, progress }) => {
+  switch (minesweeperState) {
     case "gameOver": {
       return <span>😵</span>;
     }
@@ -451,155 +362,97 @@ const Emotion: FunctionComponent<{
     }
 
     default: {
-      throw new Error(`Unknown game state: ${state satisfies never}`);
+      throw new Error(
+        `Unknown minesweeperState: ${minesweeperState satisfies never}`,
+      );
     }
   }
 };
 
-const cellClassName =
-  "w-8 h-8 rounded-md border shadow-sm flex items-center justify-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500";
+const Result: FunctionComponent<{
+  minesweeperState: MinesweeperState;
+  stopwatch: number;
+}> = ({ minesweeperState, stopwatch }) => {
+  switch (minesweeperState) {
+    case "gameOver": {
+      return (
+        <div className="mx-auto w-full max-w-md rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-center text-red-800 shadow-sm">
+          <p className="mb-2 text-xl font-bold">ゲームオーバー</p>
+          <p className="text-base">マツボックリに当たってしまいました</p>
+        </div>
+      );
+    }
 
-const HiddenCell: FunctionComponent<{
-  rowIndex: number;
-  columnIndex: number;
-  setBoard: Dispatch<SetStateAction<Cell[][]>>;
-}> = ({ rowIndex, columnIndex, setBoard }) => {
+    case "completed": {
+      return (
+        <div className="mx-auto w-full max-w-md rounded-xl border border-green-100 bg-green-50 px-6 py-4 text-center text-green-800 shadow-sm">
+          <p className="mb-2 text-xl font-bold">クリア！</p>
+          <p className="text-base">素晴らしいマツボックリ探索でした！</p>
+          <p className="text-base">タイム {stopwatch}秒</p>
+        </div>
+      );
+    }
+
+    case "playing": {
+      return;
+    }
+
+    default: {
+      throw new Error(
+        `Unknown minesweeperState: ${minesweeperState satisfies never}`,
+      );
+    }
+  }
+};
+
+const RetryButton: FunctionComponent<{
+  minesweeperState: MinesweeperState;
+  reset: () => void;
+}> = ({ minesweeperState, reset }) => {
   const handleClick = () => {
-    setBoard((prev) => {
-      const board = [...prev].map((row) => [...row]);
-
-      board[rowIndex][columnIndex] = {
-        ...board[rowIndex][columnIndex],
-        state: "revealed",
-      };
-
-      return board;
-    });
+    reset();
   };
 
-  return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className={clsx(
-        cellClassName,
-        "border-zinc-300 bg-zinc-200 hover:bg-zinc-300",
-      )}
-    />
-  );
-};
-
-const RevealedCell: FunctionComponent<{
-  board: Cell[][];
-  rowIndex: number;
-  columnIndex: number;
-  setBoard: Dispatch<SetStateAction<Cell[][]>>;
-}> = ({ board, rowIndex, columnIndex, setBoard }) => {
-  if (board[rowIndex][columnIndex].mineIncluded) {
-    return (
-      <button
-        type="button"
-        disabled
-        className={clsx(cellClassName, "border-red-200 bg-red-100")}
-      >
-        🌰
-      </button>
-    );
-  }
-
-  const adjacentCells = board
-    .slice(Math.max(rowIndex - 1, 0), rowIndex + 2)
-    .flatMap((row) => row.slice(Math.max(columnIndex - 1, 0), columnIndex + 2));
-  const adjacentMineCount = adjacentCells.reduce(
-    (sum, cell) => sum + (cell.mineIncluded ? 1 : 0),
-    0,
-  );
-
-  if (
-    !adjacentMineCount &&
-    adjacentCells.some(
-      (cell) => ({ hidden: true, revealed: false, flagged: true })[cell.state],
-    )
-  ) {
-    setBoard((prev) => {
-      const board = [...prev].map((row) => [...row]);
-
-      for (
-        let adjacentRowIndex = Math.max(rowIndex - 1, 0);
-        adjacentRowIndex < Math.min(rowIndex + 2, board.length);
-        adjacentRowIndex++
-      ) {
-        for (
-          let adjacentColumnIndex = Math.max(columnIndex - 1, 0);
-          adjacentColumnIndex <
-          Math.min(columnIndex + 2, board[adjacentRowIndex].length);
-          adjacentColumnIndex++
-        ) {
-          board[adjacentRowIndex][adjacentColumnIndex] = {
-            ...board[adjacentRowIndex][adjacentColumnIndex],
-            state: "revealed",
-          };
-        }
-      }
-
-      return board;
-    });
-  }
-
-  const colorClassName = {
-    0: "bg-zinc-50 text-zinc-400 border-zinc-200",
-    1: "bg-blue-50 text-blue-600 border-blue-200",
-    2: "bg-green-50 text-green-600 border-green-200",
-    3: "bg-red-50 text-red-600 border-red-200",
-    4: "bg-indigo-50 text-indigo-700 border-indigo-200",
-    5: "bg-amber-50 text-amber-700 border-amber-200",
-    6: "bg-pink-50 text-pink-700 border-pink-200",
-    7: "bg-purple-50 text-purple-700 border-purple-200",
-    8: "bg-cyan-50 text-cyan-800 border-cyan-200",
-  }[adjacentMineCount];
-
-  return (
-    <button
-      type="button"
-      disabled
-      className={clsx(cellClassName, colorClassName)}
-    >
-      {adjacentMineCount || ""}
-    </button>
-  );
-};
-
-const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
-  state,
-  cell,
-}) => {
-  switch (state) {
-    case "gameOver": {
-      if (cell.mineIncluded) {
-        return (
-          <button
-            type="button"
-            className={clsx(cellClassName, "border-orange-200 bg-orange-100")}
-          >
-            🤔
-          </button>
-        );
-      }
+  switch (minesweeperState) {
+    case "gameOver":
+    case "completed": {
+      return (
+        <button
+          type="button"
+          onClick={handleClick}
+          className={buttonClassNames.primary}
+        >
+          もう一度遊ぶ
+        </button>
+      );
     }
-    case "completed":
+
     case "playing": {
       return (
         <button
           type="button"
-          className={clsx(cellClassName, "border-green-200 bg-green-100")}
+          onClick={handleClick}
+          className={buttonClassNames.secondary}
         >
-          🌲
+          やり直す
         </button>
       );
     }
 
     default: {
-      throw new Error(`Unknown game state: ${state satisfies never}`);
+      throw new Error(
+        `Unknown minesweeperState: ${minesweeperState satisfies never}`,
+      );
     }
   }
+};
+
+const buttonClassNames = {
+  primary:
+    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
+  secondary:
+    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm border border-zinc-300 bg-white hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500",
+  option: "rounded-lg border px-4 py-2 text-sm font-medium shadow-sm",
+  optionActive: "border-zinc-400 bg-zinc-100 text-zinc-800",
+  optionInactive: "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50",
 };
