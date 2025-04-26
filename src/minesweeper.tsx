@@ -371,12 +371,13 @@ const getMinesweeperState = (board: CellState[][]) => {
 };
 
 const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
+  imageData
+    ? getImageBasedMineCandidates(size, imageData)
+    : getRandomMineCandidates(size);
+
+const getImageBasedMineCandidates = (size: number, imageData: ImageData) =>
   [...Array(size).keys()].flatMap((rowIndex) =>
     [...Array(size).keys()].flatMap((columnIndex) => {
-      if (!imageData) {
-        return [{ columnIndex, rowIndex, x: 0, y: 0 }];
-      }
-
       const x = Math.floor(
         ((columnIndex + Math.random()) / size) * imageData.width,
       );
@@ -391,6 +392,16 @@ const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
         () => ({ columnIndex, rowIndex, x, y }),
       );
     }),
+  );
+
+const getRandomMineCandidates = (size: number) =>
+  [...Array(size).keys()].flatMap((rowIndex) =>
+    [...Array(size).keys()].map((columnIndex) => ({
+      columnIndex,
+      rowIndex,
+      x: 0,
+      y: 0,
+    })),
   );
 
 const Emotion: FunctionComponent<{
