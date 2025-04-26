@@ -43,6 +43,8 @@ export const Minesweeper: FunctionComponent = () => {
       ) / board.flat().length;
   const started = Boolean(progress);
 
+  const [operating, setOperating] = useState(false);
+
   const reset = useCallback(() => {
     const size = {
       easy: 8,
@@ -127,6 +129,16 @@ export const Minesweeper: FunctionComponent = () => {
     event,
   ) => {
     setMineRatio(Number(event.target.value));
+  };
+
+  const handleCellPointerDown = () => {
+    setOperating(true);
+  };
+  const handleCellPointerUp = () => {
+    setOperating(false);
+  };
+  const handleCellPointerCancel = () => {
+    setOperating(false);
   };
 
   return (
@@ -234,7 +246,11 @@ export const Minesweeper: FunctionComponent = () => {
           </div>
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-2xl">
-            <Emotion minesweeperState={minesweeperState} progress={progress} />
+            <Emotion
+              minesweeperState={minesweeperState}
+              operating={operating}
+              progress={progress}
+            />
           </div>
         </div>
 
@@ -242,15 +258,21 @@ export const Minesweeper: FunctionComponent = () => {
           {board.map((row, rowIndex) => (
             <div key={rowIndex} className="flex gap-1">
               {row.map((cell, columnIndex) => (
-                <Cell
+                <div
                   key={columnIndex}
-                  minesweeperState={minesweeperState}
-                  board={board}
-                  rowIndex={rowIndex}
-                  columnIndex={columnIndex}
-                  cell={cell}
-                  setBoard={setBoard}
-                />
+                  onPointerDown={handleCellPointerDown}
+                  onPointerUp={handleCellPointerUp}
+                  onPointerCancel={handleCellPointerCancel}
+                >
+                  <Cell
+                    minesweeperState={minesweeperState}
+                    board={board}
+                    rowIndex={rowIndex}
+                    columnIndex={columnIndex}
+                    cell={cell}
+                    setBoard={setBoard}
+                  />
+                </div>
               ))}
             </div>
           ))}
@@ -340,8 +362,9 @@ const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
 
 const Emotion: FunctionComponent<{
   minesweeperState: MinesweeperState;
+  operating: boolean;
   progress: number;
-}> = ({ minesweeperState, progress }) => {
+}> = ({ minesweeperState, operating, progress }) => {
   switch (minesweeperState) {
     case "gameOver": {
       return <span>😵</span>;
@@ -352,7 +375,7 @@ const Emotion: FunctionComponent<{
     }
 
     case "playing": {
-      if (false) {
+      if (operating) {
         // ゲームが進行するにつれて緊張した顔になる
         return <span>🤨</span>;
       }
