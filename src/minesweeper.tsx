@@ -21,6 +21,19 @@ interface Cell {
   mineIncluded: boolean;
 }
 
+// Catalyst UI Kit のスタイル
+const buttonStyles = {
+  primary: "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
+  secondary: "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm border border-zinc-300 bg-white hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500",
+  option: "rounded-lg border px-4 py-2 text-sm font-medium shadow-sm",
+  optionActive: "border-zinc-400 bg-zinc-100 text-zinc-800",
+  optionInactive: "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50",
+  badge: {
+    green: "inline-flex items-center rounded-md bg-green-500/15 px-2 py-1 text-sm font-medium text-green-700",
+    red: "inline-flex items-center rounded-md bg-red-500/15 px-2 py-1 text-sm font-medium text-red-700",
+  },
+};
+
 export const Minesweeper: FunctionComponent = () => {
   const [imageURL, setImageURL] = useState<string>();
   const [imageData, setImageData] = useState<ImageData>();
@@ -159,166 +172,190 @@ export const Minesweeper: FunctionComponent = () => {
   const handleShareButtonClick = () => {};
 
   return (
-    <div className="flex flex-col items-center space-y-6">
-      <p>マツボックリが落ちてる写真をもとに爆弾🌰を配置します。</p>
-      <input type="file" accept="image/*" onChange={handleImageInputChange} />
-      {imageURL && <img alt="" src={imageURL} />}
-
-      <div className="flex w-full flex-col items-center space-y-4">
-        <div className="flex flex-wrap justify-center gap-2">
-          {difficulties.map((difficultyOption) => {
-            const handleClick = () => {
-              setDifficulty(difficultyOption);
-            };
-
-            const difficultyText = {
-              easy: "小さめ",
-              normal: "ふつう",
-              hard: "大規模",
-            }[difficultyOption];
-            const isActive = difficultyOption === difficulty;
-
-            return (
-              <button
-                key={difficultyOption}
-                type="button"
-                onClick={handleClick}
-                className={clsx(
-                  "rounded-md border px-4 py-2 text-sm font-medium shadow-sm",
-                  isActive
-                    ? "border-neutral-400 bg-neutral-100 text-neutral-800"
-                    : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50",
-                )}
-              >
-                {difficultyText}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="w-64 max-w-md">
-          <label className="mb-1 block text-center text-sm font-medium text-neutral-700">
-            マツボックリの量
-          </label>
-          <input
-            type="range"
-            min={0.03125}
-            max={0.96875}
-            step={0.03125}
-            value={mineRatio}
-            onChange={handleMineRatioInputChange}
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-neutral-200"
-          />
-        </div>
+    <div className="flex flex-col items-center space-y-8 max-w-2xl mx-auto">
+      <div className="text-center">
+        <p className="text-zinc-600">マツボックリが落ちてる写真をもとに爆弾🌰を配置します。</p>
       </div>
-
-      <div className="space-y-4">
-        <div className="mx-auto inline-block space-y-0">
-          <div className="relative rounded-t-md border border-b-0 border-neutral-200 bg-neutral-50 px-4 py-2 font-mono">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-x-4">
-                <span className="flex items-center gap-1 text-neutral-700">
-                  <span className="text-lg">🌰</span>{" "}
-                  {mineCount.toString().padStart(2, "0")}個
-                </span>
-                <span className="flex items-center gap-1 text-neutral-700">
-                  <span className="text-lg">🌲</span>{" "}
-                  {flagCount.toString().padStart(2, "0")}個
-                  {flagCount <= mineCount ? "" : "🤔"}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1 text-neutral-700">
-                <span className="text-lg">⏱</span>{" "}
-                {stopwatch.toString().padStart(3, "0")}秒
-              </div>
-            </div>
-
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-2xl">
-              <Emotion state={state} progress={progress} />
-            </div>
-          </div>
-
-          <div className="rounded-b-md border border-t-0 border-neutral-200 bg-neutral-50 p-2">
-            <div className="grid gap-1">
-              {board.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex gap-1">
-                  {row.map((cell, columnIndex) => {
-                    switch (cell.state) {
-                      case "hidden": {
-                        return (
-                          <HiddenCell
-                            key={columnIndex}
-                            rowIndex={rowIndex}
-                            columnIndex={columnIndex}
-                            setBoard={setBoard}
-                          />
-                        );
-                      }
-
-                      case "revealed": {
-                        return (
-                          <RevealedCell
-                            key={columnIndex}
-                            board={board}
-                            rowIndex={rowIndex}
-                            columnIndex={columnIndex}
-                            setBoard={setBoard}
-                          />
-                        );
-                      }
-
-                      case "flagged": {
-                        return (
-                          <FlaggedCell
-                            key={columnIndex}
-                            state={state}
-                            cell={cell}
-                          />
-                        );
-                      }
-
-                      default: {
-                        throw new Error(
-                          `Unknown cell state: ${cell.state satisfies never}`,
-                        );
-                      }
-                    }
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+      
+      <div className="w-full space-y-6 flex flex-col items-center">
+        <div className="flex flex-col items-center text-center w-full max-w-md">
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleImageInputChange}
+            id="image-upload"
+            className="hidden"
+          />
+          <label 
+            htmlFor="image-upload"
+            className={buttonStyles.secondary}
+          >
+            写真を選択
+          </label>
         </div>
-
-        {state !== "playing" && (
-          <div className="mx-auto text-center">
-            {state === "completed" ? (
-              <div className="inline-block rounded-md border border-green-400 bg-green-100 px-6 py-4 text-green-700 shadow-md">
-                <p className="text-xl font-bold">クリア！</p>
-                <p className="text-lg">素晴らしいマツボックリ探索でした！</p>
-                <p className="text-lg">タイム {stopwatch}秒</p>
-              </div>
-            ) : (
-              <div className="inline-block rounded-md border border-red-400 bg-red-100 px-6 py-4 text-red-700 shadow-md">
-                <p className="text-xl font-bold">ゲームオーバー</p>
-                <p className="text-lg">マツボックリに当たってしまいました</p>
-              </div>
-            )}
+        
+        {imageURL && (
+          <div className="mt-4 overflow-hidden rounded-lg max-w-md">
+            <img alt="" src={imageURL} className="w-full h-auto" />
           </div>
         )}
+
+        <div className="space-y-4 flex flex-col items-center w-full max-w-md">
+          <div className="w-full text-center">
+            <h3 className="text-sm font-medium text-zinc-700 mb-2">ボードの大きさ</h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {difficulties.map((difficultyOption) => {
+                const handleClick = () => {
+                  setDifficulty(difficultyOption);
+                };
+
+                const difficultyText = {
+                  easy: "小さめ",
+                  normal: "ふつう",
+                  hard: "大規模",
+                }[difficultyOption];
+                const isActive = difficultyOption === difficulty;
+
+                return (
+                  <button
+                    key={difficultyOption}
+                    type="button"
+                    onClick={handleClick}
+                    className={clsx(
+                      buttonStyles.option,
+                      isActive
+                        ? buttonStyles.optionActive
+                        : buttonStyles.optionInactive,
+                    )}
+                  >
+                    {difficultyText}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="w-full text-center">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              マツボックリの量
+            </label>
+            <input
+              type="range"
+              min={0.03125}
+              max={0.96875}
+              step={0.03125}
+              value={mineRatio}
+              onChange={handleMineRatioInputChange}
+              className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-zinc-600"
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap justify-center gap-3">
+      <div className="mx-auto max-w-md w-full bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+        <div className="relative border-b border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-x-4">
+              <span className="flex items-center gap-1 text-zinc-700 font-medium">
+                <span className="text-lg">🌰</span>{" "}
+                {mineCount}個
+              </span>
+              <span className="flex items-center gap-1 text-zinc-700 font-medium">
+                <span className="text-lg">🌲</span>{" "}
+                {flagCount}個
+                {flagCount <= mineCount ? "" : <span className="text-amber-500">🤔</span>}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 text-zinc-700 font-medium">
+              <span className="text-lg">⏱</span>{" "}
+              {stopwatch}秒
+            </div>
+          </div>
+
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-2xl">
+            <Emotion state={state} progress={progress} />
+          </div>
+        </div>
+
+        <div className="p-4 bg-zinc-50">
+          <div className="overflow-auto" style={{ maxHeight: '80vh', maxWidth: '100%' }}>
+            <div className="flex justify-center min-w-fit">
+              <div className="grid gap-1">
+                {board.map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex gap-1">
+                    {row.map((cell, columnIndex) => {
+                      switch (cell.state) {
+                        case "hidden": {
+                          return (
+                            <HiddenCell
+                              key={columnIndex}
+                              rowIndex={rowIndex}
+                              columnIndex={columnIndex}
+                              setBoard={setBoard}
+                            />
+                          );
+                        }
+
+                        case "revealed": {
+                          return (
+                            <RevealedCell
+                              key={columnIndex}
+                              board={board}
+                              rowIndex={rowIndex}
+                              columnIndex={columnIndex}
+                              setBoard={setBoard}
+                            />
+                          );
+                        }
+
+                        case "flagged": {
+                          return (
+                            <FlaggedCell
+                              key={columnIndex}
+                              state={state}
+                              cell={cell}
+                            />
+                          );
+                        }
+
+                        default: {
+                          throw new Error(
+                            `Unknown cell state: ${cell.state satisfies never}`,
+                          );
+                        }
+                      }
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {state !== "playing" && (
+        <div className="w-full max-w-md mx-auto text-center">
+          {state === "completed" ? (
+            <div className="rounded-xl border border-green-100 bg-green-50 px-6 py-4 text-green-800 shadow-sm">
+              <p className="text-xl font-bold mb-2">クリア！</p>
+              <p className="text-base">素晴らしいマツボックリ探索でした！</p>
+              <p className="text-base">タイム {stopwatch}秒</p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-red-800 shadow-sm">
+              <p className="text-xl font-bold mb-2">ゲームオーバー</p>
+              <p className="text-base">マツボックリに当たってしまいました</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-wrap justify-center gap-3">
         <button
           type="button"
           onClick={handleRetryButton}
-          className={clsx(
-            "inline-flex items-center justify-center gap-x-2 rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-            state !== "playing"
-              ? "bg-neutral-900 text-white hover:bg-neutral-800 focus-visible:outline-neutral-900"
-              : "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 focus-visible:outline-neutral-500",
-          )}
+          className={state !== "playing" ? buttonStyles.primary : buttonStyles.secondary}
         >
           {state !== "playing" ? "もう一度遊ぶ" : "やり直す"}
         </button>
@@ -333,7 +370,7 @@ export const Minesweeper: FunctionComponent = () => {
                 : "マツボックリスイーパーで遊んでいます",
           })}`}
           target="_blank"
-          className="inline-flex items-center justify-center gap-x-2 rounded-md bg-neutral-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+          className={clsx(buttonStyles.primary, "gap-x-2")}
           onClick={handleShareButtonClick}
         >
           Xにポスト
@@ -341,7 +378,7 @@ export const Minesweeper: FunctionComponent = () => {
         </a>
       </div>
 
-      <p className="pt-4 text-center text-sm text-neutral-500">
+      <p className="text-center text-sm text-zinc-500">
         #マツボックリスイーパー
         タグ付きでXにポストすると、このサイトに掲載されることがあります。
       </p>
@@ -414,7 +451,7 @@ const Emotion: FunctionComponent<{
 };
 
 const cellClassName =
-  "w-10 h-10 rounded-md border border-neutral-200 shadow-sm flex items-center justify-center text-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500";
+  "w-8 h-8 rounded-md border shadow-sm flex items-center justify-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500";
 
 const HiddenCell: FunctionComponent<{
   rowIndex: number;
@@ -438,7 +475,7 @@ const HiddenCell: FunctionComponent<{
     <button
       type="button"
       onClick={handleClick}
-      className={clsx(cellClassName, "bg-neutral-200 hover:bg-neutral-300")}
+      className={clsx(cellClassName, "bg-zinc-200 hover:bg-zinc-300 border-zinc-300")}
     />
   );
 };
@@ -454,7 +491,7 @@ const RevealedCell: FunctionComponent<{
       <button
         type="button"
         disabled
-        className={clsx(cellClassName, "bg-red-100")}
+        className={clsx(cellClassName, "bg-red-100 border-red-200")}
       >
         🌰
       </button>
@@ -501,15 +538,15 @@ const RevealedCell: FunctionComponent<{
   }
 
   const colorClassName = {
-    0: "bg-neutral-50 text-neutral-400",
-    1: "bg-blue-50 text-blue-600",
-    2: "bg-green-50 text-green-600",
-    3: "bg-red-50 text-red-600",
-    4: "bg-indigo-50 text-indigo-700",
-    5: "bg-yellow-50 text-yellow-700",
-    6: "bg-pink-50 text-pink-700",
-    7: "bg-purple-50 text-purple-700",
-    8: "bg-cyan-50 text-cyan-800",
+    0: "bg-zinc-50 text-zinc-400 border-zinc-200",
+    1: "bg-blue-50 text-blue-600 border-blue-200",
+    2: "bg-green-50 text-green-600 border-green-200",
+    3: "bg-red-50 text-red-600 border-red-200",
+    4: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    5: "bg-amber-50 text-amber-700 border-amber-200",
+    6: "bg-pink-50 text-pink-700 border-pink-200",
+    7: "bg-purple-50 text-purple-700 border-purple-200",
+    8: "bg-cyan-50 text-cyan-800 border-cyan-200",
   }[adjacentMineCount];
 
   return (
@@ -533,7 +570,7 @@ const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
         return (
           <button
             type="button"
-            className={clsx(cellClassName, "bg-orange-100")}
+            className={clsx(cellClassName, "bg-orange-100 border-orange-200")}
           >
             🤔
           </button>
@@ -543,7 +580,7 @@ const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
     case "completed":
     case "playing": {
       return (
-        <button type="button" className={clsx(cellClassName, "bg-green-100")}>
+        <button type="button" className={clsx(cellClassName, "bg-green-100 border-green-200")}>
           🌲
         </button>
       );
