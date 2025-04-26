@@ -16,6 +16,7 @@ export type MinesweeperState = ReturnType<typeof getMinesweeperState>;
 
 export const Minesweeper: FunctionComponent = () => {
   const [imageURL, setImageURL] = useState<string>();
+  const [imageMines, setImageMines] = useState<[number, number][]>([]);
   const [imageData, setImageData] = useState<ImageData>();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [mineRatio, setMineRatio] = useState(0.125);
@@ -66,13 +67,16 @@ export const Minesweeper: FunctionComponent = () => {
       })),
     );
 
-    for (const [columnIndex, rowIndex] of toShuffled(
+    const imageMines: [number, number][] = [];
+    for (const { columnIndex, rowIndex, x, y } of toShuffled(
       getMineCandidates(size, imageData),
     ).slice(0, Math.round(size ** 2 * mineRatio))) {
       board[rowIndex][columnIndex].mineIncluded = true;
+      imageMines.push([x, y]);
     }
 
     setBoard(board);
+    setImageMines(imageMines);
   }, [difficulty, imageData, mineRatio]);
 
   useLayoutEffect(() => {
@@ -351,9 +355,9 @@ const getMinesweeperState = (board: CellState[][]) => {
 
 const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
   [...Array(size).keys()].flatMap((rowIndex) =>
-    [...Array(size).keys()].flatMap((columnIndex): [number, number][] => {
+    [...Array(size).keys()].flatMap((columnIndex) => {
       if (!imageData) {
-        return [[columnIndex, rowIndex]];
+        return [{ columnIndex, rowIndex, x: 0, y: 0 }];
       }
 
       const x = Math.floor(
@@ -367,7 +371,7 @@ const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
 
       const grayscale = Math.round(r * 0.2126 + g * 0.7152 + b * 0.0722);
       return [...Array(Math.floor(((255 - grayscale) / 256) * 16)).keys()].map(
-        () => [columnIndex, rowIndex],
+        () => ({ columnIndex, rowIndex, x, y }),
       );
     }),
   );
