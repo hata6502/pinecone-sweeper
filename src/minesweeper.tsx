@@ -23,13 +23,16 @@ interface Cell {
 
 // Catalyst UI Kit のスタイル
 const buttonStyles = {
-  primary: "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
-  secondary: "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm border border-zinc-300 bg-white hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500",
+  primary:
+    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
+  secondary:
+    "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm border border-zinc-300 bg-white hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500",
   option: "rounded-lg border px-4 py-2 text-sm font-medium shadow-sm",
   optionActive: "border-zinc-400 bg-zinc-100 text-zinc-800",
   optionInactive: "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50",
   badge: {
-    green: "inline-flex items-center rounded-md bg-green-500/15 px-2 py-1 text-sm font-medium text-green-700",
+    green:
+      "inline-flex items-center rounded-md bg-green-500/15 px-2 py-1 text-sm font-medium text-green-700",
     red: "inline-flex items-center rounded-md bg-red-500/15 px-2 py-1 text-sm font-medium text-red-700",
   },
 };
@@ -172,37 +175,38 @@ export const Minesweeper: FunctionComponent = () => {
   const handleShareButtonClick = () => {};
 
   return (
-    <div className="flex flex-col items-center space-y-8 max-w-2xl mx-auto">
+    <div className="mx-auto flex max-w-2xl flex-col items-center space-y-8">
       <div className="text-center">
-        <p className="text-zinc-600">マツボックリが落ちてる写真をもとに爆弾🌰を配置します。</p>
+        <p className="text-zinc-600">
+          マツボックリが落ちてる写真をもとに爆弾🌰を配置します。
+        </p>
       </div>
-      
-      <div className="w-full space-y-6 flex flex-col items-center">
-        <div className="flex flex-col items-center text-center w-full max-w-md">
-          <input 
-            type="file" 
-            accept="image/*" 
+
+      <div className="flex w-full flex-col items-center space-y-6">
+        <div className="flex w-full max-w-md flex-col items-center text-center">
+          <input
+            type="file"
+            accept="image/*"
             onChange={handleImageInputChange}
             id="image-upload"
             className="hidden"
           />
-          <label 
-            htmlFor="image-upload"
-            className={buttonStyles.secondary}
-          >
+          <label htmlFor="image-upload" className={buttonStyles.secondary}>
             写真を選択
           </label>
         </div>
-        
+
         {imageURL && (
-          <div className="mt-4 overflow-hidden rounded-lg max-w-md">
-            <img alt="" src={imageURL} className="w-full h-auto" />
+          <div className="mt-4 max-w-md overflow-hidden rounded-lg">
+            <img alt="" src={imageURL} className="h-auto w-full" />
           </div>
         )}
 
-        <div className="space-y-4 flex flex-col items-center w-full max-w-md">
+        <div className="flex w-full max-w-md flex-col items-center space-y-4">
           <div className="w-full text-center">
-            <h3 className="text-sm font-medium text-zinc-700 mb-2">ボードの大きさ</h3>
+            <h3 className="mb-2 text-sm font-medium text-zinc-700">
+              ボードの大きさ
+            </h3>
             <div className="flex flex-wrap justify-center gap-2">
               {difficulties.map((difficultyOption) => {
                 const handleClick = () => {
@@ -236,7 +240,7 @@ export const Minesweeper: FunctionComponent = () => {
           </div>
 
           <div className="w-full text-center">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-zinc-700">
               マツボックリの量
             </label>
             <input
@@ -246,30 +250,31 @@ export const Minesweeper: FunctionComponent = () => {
               step={0.03125}
               value={mineRatio}
               onChange={handleMineRatioInputChange}
-              className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-zinc-600"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-zinc-600"
             />
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-md w-full bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+      <div className="mx-auto w-full max-w-md overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div className="relative border-b border-zinc-200 bg-zinc-50 px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex gap-x-4">
-              <span className="flex items-center gap-1 text-zinc-700 font-medium">
-                <span className="text-lg">🌰</span>{" "}
-                {mineCount}個
+              <span className="flex items-center gap-1 font-medium text-zinc-700">
+                <span className="text-lg">🌰</span> {mineCount}個
               </span>
-              <span className="flex items-center gap-1 text-zinc-700 font-medium">
-                <span className="text-lg">🌲</span>{" "}
-                {flagCount}個
-                {flagCount <= mineCount ? "" : <span className="text-amber-500">🤔</span>}
+              <span className="flex items-center gap-1 font-medium text-zinc-700">
+                <span className="text-lg">🌲</span> {flagCount}個
+                {flagCount <= mineCount ? (
+                  ""
+                ) : (
+                  <span className="text-amber-500">🤔</span>
+                )}
               </span>
             </div>
 
-            <div className="flex items-center gap-1 text-zinc-700 font-medium">
-              <span className="text-lg">⏱</span>{" "}
-              {stopwatch}秒
+            <div className="flex items-center gap-1 font-medium text-zinc-700">
+              <span className="text-lg">⏱</span> {stopwatch}秒
             </div>
           </div>
 
@@ -278,9 +283,12 @@ export const Minesweeper: FunctionComponent = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-zinc-50">
-          <div className="overflow-auto" style={{ maxHeight: '80vh', maxWidth: '100%' }}>
-            <div className="flex justify-center min-w-fit">
+        <div className="bg-zinc-50 p-4">
+          <div
+            className="overflow-auto"
+            style={{ maxHeight: "80vh", maxWidth: "100%" }}
+          >
+            <div className="flex min-w-fit justify-center">
               <div className="grid gap-1">
                 {board.map((row, rowIndex) => (
                   <div key={rowIndex} className="flex gap-1">
@@ -335,16 +343,16 @@ export const Minesweeper: FunctionComponent = () => {
       </div>
 
       {state !== "playing" && (
-        <div className="w-full max-w-md mx-auto text-center">
+        <div className="mx-auto w-full max-w-md text-center">
           {state === "completed" ? (
             <div className="rounded-xl border border-green-100 bg-green-50 px-6 py-4 text-green-800 shadow-sm">
-              <p className="text-xl font-bold mb-2">クリア！</p>
+              <p className="mb-2 text-xl font-bold">クリア！</p>
               <p className="text-base">素晴らしいマツボックリ探索でした！</p>
               <p className="text-base">タイム {stopwatch}秒</p>
             </div>
           ) : (
             <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-red-800 shadow-sm">
-              <p className="text-xl font-bold mb-2">ゲームオーバー</p>
+              <p className="mb-2 text-xl font-bold">ゲームオーバー</p>
               <p className="text-base">マツボックリに当たってしまいました</p>
             </div>
           )}
@@ -355,7 +363,9 @@ export const Minesweeper: FunctionComponent = () => {
         <button
           type="button"
           onClick={handleRetryButton}
-          className={state !== "playing" ? buttonStyles.primary : buttonStyles.secondary}
+          className={
+            state !== "playing" ? buttonStyles.primary : buttonStyles.secondary
+          }
         >
           {state !== "playing" ? "もう一度遊ぶ" : "やり直す"}
         </button>
@@ -475,7 +485,10 @@ const HiddenCell: FunctionComponent<{
     <button
       type="button"
       onClick={handleClick}
-      className={clsx(cellClassName, "bg-zinc-200 hover:bg-zinc-300 border-zinc-300")}
+      className={clsx(
+        cellClassName,
+        "border-zinc-300 bg-zinc-200 hover:bg-zinc-300",
+      )}
     />
   );
 };
@@ -491,7 +504,7 @@ const RevealedCell: FunctionComponent<{
       <button
         type="button"
         disabled
-        className={clsx(cellClassName, "bg-red-100 border-red-200")}
+        className={clsx(cellClassName, "border-red-200 bg-red-100")}
       >
         🌰
       </button>
@@ -570,7 +583,7 @@ const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
         return (
           <button
             type="button"
-            className={clsx(cellClassName, "bg-orange-100 border-orange-200")}
+            className={clsx(cellClassName, "border-orange-200 bg-orange-100")}
           >
             🤔
           </button>
@@ -580,7 +593,10 @@ const FlaggedCell: FunctionComponent<{ state: State; cell: Cell }> = ({
     case "completed":
     case "playing": {
       return (
-        <button type="button" className={clsx(cellClassName, "bg-green-100 border-green-200")}>
+        <button
+          type="button"
+          className={clsx(cellClassName, "border-green-200 bg-green-100")}
+        >
           🌲
         </button>
       );
