@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { CellState, Cell } from "./cell";
+import { getImageBasedMineCandidates } from "./detect";
 import { toShuffled } from "./shuffle";
 
 export type MinesweeperState = ReturnType<typeof getMinesweeperState>;
@@ -374,25 +375,6 @@ const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
   imageData
     ? getImageBasedMineCandidates(size, imageData)
     : getRandomMineCandidates(size);
-
-const getImageBasedMineCandidates = (size: number, imageData: ImageData) =>
-  [...Array(size).keys()].flatMap((rowIndex) =>
-    [...Array(size).keys()].flatMap((columnIndex) => {
-      const x = Math.floor(
-        ((columnIndex + Math.random()) / size) * imageData.width,
-      );
-      const y = Math.floor(
-        ((rowIndex + Math.random()) / size) * imageData.height,
-      );
-      const index = (y * imageData.width + x) * 4;
-      const [r, g, b] = imageData.data.slice(index, index + 3);
-
-      const grayscale = Math.round(r * 0.2126 + g * 0.7152 + b * 0.0722);
-      return [...Array(Math.floor(((255 - grayscale) / 256) * 16)).keys()].map(
-        () => ({ columnIndex, rowIndex, x, y }),
-      );
-    }),
-  );
 
 const getRandomMineCandidates = (size: number) =>
   [...Array(size).keys()].flatMap((rowIndex) =>

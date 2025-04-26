@@ -10,5 +10,5 @@
     "strict": true,
     "target": "esnext"
   },
-  "exclude": ["src/catalyst-ui-kit"]
+  "exclude": ["catalyst-ui-kit"]
 }
