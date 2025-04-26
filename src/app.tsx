@@ -30,7 +30,7 @@ export const App: FunctionComponent = () => {
           マツボックリ
           <wbr />
           スイーパー
-          <img src="favicon.png" className="inline w-18" />
+          <img src="favicon.png" className="inline w-20" />
         </h2>
       </div>
 
