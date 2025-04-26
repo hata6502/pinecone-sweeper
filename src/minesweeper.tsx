@@ -30,7 +30,11 @@ export const Minesweeper: FunctionComponent = () => {
   const flagCount = board
     .flat()
     .reduce(
-      (sum, cell) => sum + { hidden: 0, revealed: 0, flagged: 1 }[cell.state],
+      (sum, cell) =>
+        sum +
+        { hidden: 0, autoRevealed: 0, manualRevealed: 0, flagged: 1 }[
+          cell.state
+        ],
       0,
     );
 
@@ -38,7 +42,11 @@ export const Minesweeper: FunctionComponent = () => {
     board
       .flat()
       .reduce(
-        (sum, cell) => sum + { hidden: 0, revealed: 1, flagged: 1 }[cell.state],
+        (sum, cell) =>
+          sum +
+          { hidden: 0, autoRevealed: 1, manualRevealed: 1, flagged: 1 }[
+            cell.state
+          ],
         0,
       ) / board.flat().length;
   const started = Boolean(progress);
@@ -73,8 +81,8 @@ export const Minesweeper: FunctionComponent = () => {
 
   useEffect(() => {
     switch (minesweeperState) {
-      case "gameOver":
-      case "completed": {
+      case "completed":
+      case "gameOver": {
         return;
       }
 
@@ -310,13 +318,16 @@ type Difficulty = (typeof difficulties)[number];
 
 const getMinesweeperState = (board: CellState[][]) => {
   if (
-    board
-      .flat()
-      .some(
-        (cell) =>
-          cell.mineIncluded &&
-          { hidden: false, revealed: true, flagged: false }[cell.state],
-      )
+    board.flat().some(
+      (cell) =>
+        cell.mineIncluded &&
+        {
+          hidden: false,
+          autoRevealed: false,
+          manualRevealed: true,
+          flagged: false,
+        }[cell.state],
+    )
   ) {
     return "gameOver";
   }
@@ -326,7 +337,8 @@ const getMinesweeperState = (board: CellState[][]) => {
       (cell) =>
         ({
           hidden: cell.mineIncluded,
-          revealed: true,
+          autoRevealed: true,
+          manualRevealed: true,
           flagged: cell.mineIncluded,
         })[cell.state],
     )
@@ -366,22 +378,34 @@ const Emotion: FunctionComponent<{
   progress: number;
 }> = ({ minesweeperState, operating, progress }) => {
   switch (minesweeperState) {
-    case "gameOver": {
-      return <span>😵</span>;
-    }
-
     case "completed": {
       return <span>🥳</span>;
+    }
+
+    case "gameOver": {
+      return <span>😵</span>;
     }
 
     case "playing": {
       if (operating) {
         // ゲームが進行するにつれて緊張した顔になる
-        return <span>🤨</span>;
+        if (progress < 0.25) {
+          return <span>😐</span>;
+        }
+        if (progress < 0.75) {
+          return <span>🤨</span>;
+        }
+        return <span>🫣</span>;
       }
 
       // ゲームが進行するにつれて嬉しい顔になる
-      return <span>🙂</span>;
+      if (progress < 0.25) {
+        return <span>🙂</span>;
+      }
+      if (progress < 0.75) {
+        return <span>😊</span>;
+      }
+      return <span>😄</span>;
     }
 
     default: {
@@ -397,21 +421,21 @@ const Result: FunctionComponent<{
   stopwatch: number;
 }> = ({ minesweeperState, stopwatch }) => {
   switch (minesweeperState) {
-    case "gameOver": {
-      return (
-        <div className="mx-auto w-full max-w-md rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-center text-red-800 shadow-sm">
-          <p className="mb-2 text-xl font-bold">ゲームオーバー</p>
-          <p className="text-base">マツボックリに当たってしまいました</p>
-        </div>
-      );
-    }
-
     case "completed": {
       return (
         <div className="mx-auto w-full max-w-md rounded-xl border border-green-100 bg-green-50 px-6 py-4 text-center text-green-800 shadow-sm">
           <p className="mb-2 text-xl font-bold">クリア！</p>
           <p className="text-base">素晴らしいマツボックリ探索でした！</p>
           <p className="text-base">タイム {stopwatch}秒</p>
+        </div>
+      );
+    }
+
+    case "gameOver": {
+      return (
+        <div className="mx-auto w-full max-w-md rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-center text-red-800 shadow-sm">
+          <p className="mb-2 text-xl font-bold">ゲームオーバー</p>
+          <p className="text-base">マツボックリに当たってしまいました</p>
         </div>
       );
     }
@@ -437,8 +461,8 @@ const RetryButton: FunctionComponent<{
   };
 
   switch (minesweeperState) {
-    case "gameOver":
-    case "completed": {
+    case "completed":
+    case "gameOver": {
       return (
         <button
           type="button"

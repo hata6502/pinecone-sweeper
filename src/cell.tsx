@@ -9,7 +9,7 @@ import {
 import { MinesweeperState } from "./minesweeper";
 
 export interface CellState {
-  state: "hidden" | "revealed" | "flagged";
+  state: "hidden" | "autoRevealed" | "manualRevealed" | "flagged";
   mineIncluded: boolean;
 }
 
@@ -21,7 +21,8 @@ export const Cell: FunctionComponent<
       return <HiddenCell {...props} />;
     }
 
-    case "revealed": {
+    case "autoRevealed":
+    case "manualRevealed": {
       return <RevealedCell {...props} />;
     }
 
@@ -38,49 +39,51 @@ export const Cell: FunctionComponent<
 };
 
 interface HiddenCellProps {
+  minesweeperState: MinesweeperState;
   rowIndex: number;
   columnIndex: number;
   setBoard: Dispatch<SetStateAction<CellState[][]>>;
 }
 const HiddenCell: FunctionComponent<HiddenCellProps> = ({
+  minesweeperState,
   rowIndex,
   columnIndex,
   setBoard,
 }) => {
+  switch (minesweeperState) {
+    case "completed":
+    case "gameOver": {
+      setBoard((prev) => {
+        const board = [...prev].map((row) => [...row]);
+
+        board[rowIndex][columnIndex] = {
+          ...board[rowIndex][columnIndex],
+          state: "autoRevealed",
+        };
+
+        return board;
+      });
+    }
+
+    case "playing": {
+      break;
+    }
+
+    default: {
+      throw new Error(
+        `Unknown minesweeperState: ${minesweeperState satisfies never}`,
+      );
+    }
+  }
+
   const handleClick = () => {
     setBoard((prev) => {
       const board = [...prev].map((row) => [...row]);
 
-      if (board[rowIndex][columnIndex].mineIncluded) {
-        for (
-          let fullRevealRowIndex = 0;
-          fullRevealRowIndex < board.length;
-          fullRevealRowIndex++
-        ) {
-          for (
-            let fullRevealColumnIndex = 0;
-            fullRevealColumnIndex < board[fullRevealRowIndex].length;
-            fullRevealColumnIndex++
-          ) {
-            const transitions = {
-              hidden: "revealed",
-              revealed: "revealed",
-              flagged: "flagged",
-            } as const;
-
-            const cell = board[fullRevealRowIndex][fullRevealColumnIndex];
-            board[fullRevealRowIndex][fullRevealColumnIndex] = {
-              ...cell,
-              state: transitions[cell.state],
-            };
-          }
-        }
-      } else {
-        board[rowIndex][columnIndex] = {
-          ...board[rowIndex][columnIndex],
-          state: "revealed",
-        };
-      }
+      board[rowIndex][columnIndex] = {
+        ...board[rowIndex][columnIndex],
+        state: "manualRevealed",
+      };
 
       return board;
     });
@@ -149,7 +152,13 @@ const RevealedCell: FunctionComponent<RevealedCellProps> = ({
   if (
     !adjacentMineCount &&
     adjacentCells.some(
-      (cell) => ({ hidden: true, revealed: false, flagged: true })[cell.state],
+      (cell) =>
+        ({
+          hidden: true,
+          autoRevealed: false,
+          manualRevealed: false,
+          flagged: true,
+        })[cell.state],
     )
   ) {
     setBoard((prev) => {
@@ -168,7 +177,7 @@ const RevealedCell: FunctionComponent<RevealedCellProps> = ({
         ) {
           board[adjacentRowIndex][adjacentColumnIndex] = {
             ...board[adjacentRowIndex][adjacentColumnIndex],
-            state: "revealed",
+            state: "autoRevealed",
           };
         }
       }
@@ -211,12 +220,13 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
   setBoard,
 }) => {
   const disabled = {
-    gameOver: true,
     completed: true,
+    gameOver: true,
     playing: false,
   }[minesweeperState];
 
   switch (minesweeperState) {
+    case "completed":
     case "gameOver": {
       if (!cell.mineIncluded) {
         return (
@@ -230,7 +240,6 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
         );
       }
     }
-    case "completed":
     case "playing": {
       const handleContextMenu: MouseEventHandler<HTMLButtonElement> = (
         event,
