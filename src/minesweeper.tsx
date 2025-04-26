@@ -176,8 +176,25 @@ export const Minesweeper: FunctionComponent = () => {
         </div>
 
         {imageURL && (
-          <div className="mt-4 max-w-md overflow-hidden rounded-lg">
+          <div className="relative mt-4 max-w-md overflow-hidden rounded-lg">
             <img alt="" src={imageURL} className="h-auto w-full" />
+            {(minesweeperState === "gameOver" ||
+              minesweeperState === "completed") && (
+              <div className="pointer-events-none absolute top-0 left-0 h-full w-full">
+                {imageMines.map(([x, y], index) => (
+                  <div
+                    key={index}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 transform"
+                    style={{
+                      left: `${(x / (imageData?.width || 1)) * 100}%`,
+                      top: `${(y / (imageData?.height || 1)) * 100}%`,
+                    }}
+                  >
+                    <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
