@@ -279,4 +279,4 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
 };
 
 const className =
-  "w-8 h-8 rounded-md border shadow-sm flex items-center justify-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500";
+  "select-none w-8 h-8 rounded-md border shadow-sm flex items-center justify-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500";
