@@ -6,16 +6,16 @@ import { Minesweeper } from "./minesweeper";
 
 const faqs = [
   {
-    title: "premyお絵かきアプリ",
+    title: "写真地図",
+    url: "https://almap.hata6502.com/",
+  },
+  {
+    title: "premyお絵かき",
     url: "https://premy.hata6502.com/",
   },
   {
-    title: "mibae filter開発風景",
-    url: "https://scrapbox.io/hata6502/mibae_filter",
-  },
-  {
-    title: "写真地図",
-    url: "https://almap.hata6502.com/",
+    title: "超重量級おふとん",
+    url: "https://scrapbox.io/hata6502/%E8%B6%85%E9%87%8D%E9%87%8F%E7%B4%9A%E3%81%8A%E3%81%B5%E3%81%A8%E3%82%93",
   },
 ];
 
