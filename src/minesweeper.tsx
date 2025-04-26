@@ -21,8 +21,7 @@ interface Cell {
   mineIncluded: boolean;
 }
 
-// Catalyst UI Kit のスタイル
-const buttonStyles = {
+const buttonClasses = {
   primary:
     "inline-flex items-center justify-center rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-zinc-900 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900",
   secondary:
@@ -30,11 +29,6 @@ const buttonStyles = {
   option: "rounded-lg border px-4 py-2 text-sm font-medium shadow-sm",
   optionActive: "border-zinc-400 bg-zinc-100 text-zinc-800",
   optionInactive: "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50",
-  badge: {
-    green:
-      "inline-flex items-center rounded-md bg-green-500/15 px-2 py-1 text-sm font-medium text-green-700",
-    red: "inline-flex items-center rounded-md bg-red-500/15 px-2 py-1 text-sm font-medium text-red-700",
-  },
 };
 
 export const Minesweeper: FunctionComponent = () => {
@@ -191,7 +185,7 @@ export const Minesweeper: FunctionComponent = () => {
             id="image-upload"
             className="hidden"
           />
-          <label htmlFor="image-upload" className={buttonStyles.secondary}>
+          <label htmlFor="image-upload" className={buttonClasses.secondary}>
             写真を選択
           </label>
         </div>
@@ -226,10 +220,10 @@ export const Minesweeper: FunctionComponent = () => {
                     type="button"
                     onClick={handleClick}
                     className={clsx(
-                      buttonStyles.option,
+                      buttonClasses.option,
                       isActive
-                        ? buttonStyles.optionActive
-                        : buttonStyles.optionInactive,
+                        ? buttonClasses.optionActive
+                        : buttonClasses.optionInactive,
                     )}
                   >
                     {difficultyText}
@@ -364,7 +358,9 @@ export const Minesweeper: FunctionComponent = () => {
           type="button"
           onClick={handleRetryButton}
           className={
-            state !== "playing" ? buttonStyles.primary : buttonStyles.secondary
+            state !== "playing"
+              ? buttonClasses.primary
+              : buttonClasses.secondary
           }
         >
           {state !== "playing" ? "もう一度遊ぶ" : "やり直す"}
@@ -380,7 +376,7 @@ export const Minesweeper: FunctionComponent = () => {
                 : "マツボックリスイーパーで遊んでいます",
           })}`}
           target="_blank"
-          className={clsx(buttonStyles.primary, "gap-x-2")}
+          className={clsx(buttonClasses.primary, "gap-x-2")}
           onClick={handleShareButtonClick}
         >
           Xにポスト
