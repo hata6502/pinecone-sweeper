@@ -1,15 +1,10 @@
 import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import {
-  ChangeEventHandler,
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import type { ChangeEventHandler, FunctionComponent } from "react";
 
-import { CellState, Cell } from "./cell";
+import { Cell } from "./cell";
+import type { CellState } from "./cell";
 import { getImageBasedMineCandidates } from "./detect";
 import { toShuffled } from "./shuffle";
 
@@ -211,25 +206,25 @@ export const Minesweeper: FunctionComponent = () => {
             />
           </div>
 
-           {imageURL && (
-          <div className="relative mt-4 max-w-md overflow-hidden rounded-lg">
-            <img alt="" src={imageURL} className="h-auto w-full" />
-            {(minesweeperState === "gameOver" ||
-              minesweeperState === "completed") && (
-              <div className="pointer-events-none absolute top-0 left-0 h-full w-full">
-                {imageMines.map(([x, y], index) => (
-                  <div
-                    key={index}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 transform"
-                    style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
-                  >
-                    <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          {imageURL && (
+            <div className="relative mt-4 max-w-md overflow-hidden rounded-lg">
+              <img alt="" src={imageURL} className="h-auto w-full" />
+              {(minesweeperState === "gameOver" ||
+                minesweeperState === "completed") && (
+                <div className="pointer-events-none absolute top-0 left-0 h-full w-full">
+                  {imageMines.map(([x, y], index) => (
+                    <div
+                      key={index}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 transform"
+                      style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
+                    >
+                      <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

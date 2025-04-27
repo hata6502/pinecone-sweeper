@@ -1,5 +1,6 @@
 import Clarity from "@microsoft/clarity";
-import { FunctionComponent, StrictMode, Suspense } from "react";
+import { StrictMode, Suspense } from "react";
+import type { FunctionComponent } from "react";
 import { createRoot } from "react-dom/client";
 import { SWRConfig } from "swr";
 

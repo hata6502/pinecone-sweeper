@@ -1,13 +1,8 @@
 import clsx from "clsx";
-import {
-  Dispatch,
-  FunctionComponent,
-  MouseEventHandler,
-  SetStateAction,
-} from "react";
+import type { Dispatch, FunctionComponent, SetStateAction } from "react";
 import { useLongPress } from "react-use";
 
-import { MinesweeperState } from "./minesweeper";
+import type { MinesweeperState } from "./minesweeper";
 
 export interface CellState {
   state: "hidden" | "autoRevealed" | "manualRevealed" | "flagged";
