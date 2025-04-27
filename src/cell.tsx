@@ -5,6 +5,7 @@ import {
   MouseEventHandler,
   SetStateAction,
 } from "react";
+import { useLongPress } from "react-use";
 
 import { MinesweeperState } from "./minesweeper";
 
@@ -76,6 +77,19 @@ const HiddenCell: FunctionComponent<HiddenCellProps> = ({
     }
   }
 
+  const longPressEvent = useLongPress(() => {
+    setBoard((prev) => {
+      const board = [...prev].map((row) => [...row]);
+
+      board[rowIndex][columnIndex] = {
+        ...board[rowIndex][columnIndex],
+        state: "flagged",
+      };
+
+      return board;
+    });
+  });
+
   const handleClick = () => {
     setBoard((prev) => {
       const board = [...prev].map((row) => [...row]);
@@ -89,26 +103,11 @@ const HiddenCell: FunctionComponent<HiddenCellProps> = ({
     });
   };
 
-  const handleContextMenu: MouseEventHandler<HTMLButtonElement> = (event) => {
-    event.preventDefault();
-
-    setBoard((prev) => {
-      const board = [...prev].map((row) => [...row]);
-
-      board[rowIndex][columnIndex] = {
-        ...board[rowIndex][columnIndex],
-        state: "flagged",
-      };
-
-      return board;
-    });
-  };
-
   return (
     <button
       type="button"
+      {...longPressEvent}
       onClick={handleClick}
-      onContextMenu={handleContextMenu}
       className={clsx(
         className,
         "border-zinc-300 bg-zinc-200 hover:bg-zinc-300",
@@ -225,6 +224,19 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
     playing: false,
   }[minesweeperState];
 
+  const longPressEvent = useLongPress(() => {
+    setBoard((prev) => {
+      const board = [...prev].map((row) => [...row]);
+
+      board[rowIndex][columnIndex] = {
+        ...board[rowIndex][columnIndex],
+        state: "hidden",
+      };
+
+      return board;
+    });
+  });
+
   switch (minesweeperState) {
     case "completed":
     case "gameOver": {
@@ -241,28 +253,11 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
       }
     }
     case "playing": {
-      const handleContextMenu: MouseEventHandler<HTMLButtonElement> = (
-        event,
-      ) => {
-        event.preventDefault();
-
-        setBoard((prev) => {
-          const board = [...prev].map((row) => [...row]);
-
-          board[rowIndex][columnIndex] = {
-            ...board[rowIndex][columnIndex],
-            state: "hidden",
-          };
-
-          return board;
-        });
-      };
-
       return (
         <button
           type="button"
           disabled={disabled}
-          onContextMenu={handleContextMenu}
+          {...longPressEvent}
           className={clsx(className, "border-orange-200 bg-orange-100")}
         >
           🌲
