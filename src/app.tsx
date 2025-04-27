@@ -1,5 +1,5 @@
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { FunctionComponent, useEffect, useRef } from "react";
+import { FunctionComponent, Suspence, useEffect, useRef } from "react";
 import useSWR from "swr";
 
 import { Minesweeper } from "./minesweeper";
@@ -38,9 +38,11 @@ export const App: FunctionComponent = () => {
         <Minesweeper />
       </div>
 
-      <div className="mt-16">
+      <Suspence>
+              <div className="mt-16">
         <Tweets />
       </div>
+      </Suspence>
 
       <div className="mt-16">
         <div className="divide-y divide-gray-900/10">
