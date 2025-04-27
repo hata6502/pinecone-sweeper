@@ -9,6 +9,7 @@
         default-src 'self';
         connect-src
           'self'
+          data:
           https://*.clarity.ms
           https://script.google.com
           https://script.googleusercontent.com
@@ -24,6 +25,7 @@
         ;
         script-src
           'self'
+          'unsafe-eval'
           https://platform.twitter.com
           https://www.clarity.ms
         ;

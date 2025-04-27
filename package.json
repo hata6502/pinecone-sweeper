@@ -14,7 +14,7 @@
   "scripts": {
     "build": "run-s build:*",
     "build:css": "npx @tailwindcss/cli -i src/index.css -o public/dist/index.css --minify",
-    "build:js": "esbuild src/index.tsx --outfile=public/dist/index.js --bundle --format=esm --minify",
+    "build:js": "esbuild src/index.tsx --outfile=public/dist/index.js --bundle --external:fs --external:path --format=esm --minify",
     "fix": "prettier --write .",
     "start": "http-server -c-1 public",
     "test": "run-s test:*",
@@ -27,6 +27,7 @@
     "@heroicons/react": "^2.2.0",
     "@microsoft/clarity": "^1.0.0",
     "@tailwindcss/cli": "^4.1.4",
+    "@techstark/opencv-js": "^4.10.0-release.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "clsx": "^2.1.1",

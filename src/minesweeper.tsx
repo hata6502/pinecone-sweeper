@@ -18,7 +18,6 @@ export type MinesweeperState = ReturnType<typeof getMinesweeperState>;
 export const Minesweeper: FunctionComponent = () => {
   const [imageURL, setImageURL] = useState<string>();
   const [imageMines, setImageMines] = useState<[number, number][]>([]);
-  const [imageData, setImageData] = useState<ImageData>();
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [mineRatio, setMineRatio] = useState(0.125);
   const [stopwatch, setStopwatch] = useState(0);
@@ -55,7 +54,7 @@ export const Minesweeper: FunctionComponent = () => {
 
   const [operating, setOperating] = useState(false);
 
-  const reset = useCallback(() => {
+  const reset = useCallback(async () => {
     const size = {
       easy: 8,
       normal: 12,
@@ -69,16 +68,17 @@ export const Minesweeper: FunctionComponent = () => {
     );
 
     const imageMines: [number, number][] = [];
+    const mineCount = Math.round(size ** 2 * mineRatio);
     for (const { columnIndex, rowIndex, x, y } of toShuffled(
-      getMineCandidates(size, imageData),
-    ).slice(0, Math.round(size ** 2 * mineRatio))) {
+      await getMinesCandidates(size, mineCount * 2, imageURL),
+    ).slice(0, mineCount)) {
       board[rowIndex][columnIndex].mineIncluded = true;
       imageMines.push([x, y]);
     }
 
     setBoard(board);
     setImageMines(imageMines);
-  }, [difficulty, imageData, mineRatio]);
+  }, [difficulty, imageURL, mineRatio]);
 
   useLayoutEffect(() => {
     reset();
@@ -118,24 +118,7 @@ export const Minesweeper: FunctionComponent = () => {
     event,
   ) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      setImageURL(undefined);
-      setImageData(undefined);
-      return;
-    }
-
-    setImageURL(URL.createObjectURL(file));
-
-    const imageBitmap = await createImageBitmap(file);
-    const canvas = document.createElement("canvas");
-    canvas.width = imageBitmap.width;
-    canvas.height = imageBitmap.height;
-    const canvasContext = canvas.getContext("2d");
-    if (!canvasContext) {
-      throw new Error("context is null");
-    }
-    canvasContext.drawImage(imageBitmap, 0, 0);
-    setImageData(canvasContext.getImageData(0, 0, canvas.width, canvas.height));
+    setImageURL(file && URL.createObjectURL(file));
   };
 
   const handleMineRatioInputChange: ChangeEventHandler<HTMLInputElement> = (
@@ -186,10 +169,7 @@ export const Minesweeper: FunctionComponent = () => {
                   <div
                     key={index}
                     className="absolute -translate-x-1/2 -translate-y-1/2 transform"
-                    style={{
-                      left: `${(x / (imageData?.width || 1)) * 100}%`,
-                      top: `${(y / (imageData?.height || 1)) * 100}%`,
-                    }}
+                    style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
                   >
                     <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
                   </div>
@@ -371,9 +351,13 @@ const getMinesweeperState = (board: CellState[][]) => {
   return "playing";
 };
 
-const getMineCandidates = (size: number, imageData: ImageData | undefined) =>
-  imageData
-    ? getImageBasedMineCandidates(size, imageData)
+const getMinesCandidates = async (
+  size: number,
+  mineCount: number,
+  imageURL: string | undefined,
+) =>
+  imageURL
+    ? await getImageBasedMineCandidates(size, mineCount, imageURL)
     : getRandomMineCandidates(size);
 
 const getRandomMineCandidates = (size: number) =>
