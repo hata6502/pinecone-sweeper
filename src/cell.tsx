@@ -72,18 +72,21 @@ const HiddenCell: FunctionComponent<HiddenCellProps> = ({
     }
   }
 
-  const longPressEvent = useLongPress(() => {
-    setBoard((prev) => {
-      const board = [...prev].map((row) => [...row]);
+  const longPressEvent = useLongPress(
+    () => {
+      setBoard((prev) => {
+        const board = [...prev].map((row) => [...row]);
 
-      board[rowIndex][columnIndex] = {
-        ...board[rowIndex][columnIndex],
-        state: "flagged",
-      };
+        board[rowIndex][columnIndex] = {
+          ...board[rowIndex][columnIndex],
+          state: "flagged",
+        };
 
-      return board;
-    });
-  });
+        return board;
+      });
+    },
+    { isPreventDefault: false },
+  );
 
   const handleClick = () => {
     setBoard((prev) => {
@@ -219,18 +222,21 @@ const FlaggedCell: FunctionComponent<FlaggedCellProps> = ({
     playing: false,
   }[minesweeperState];
 
-  const longPressEvent = useLongPress(() => {
-    setBoard((prev) => {
-      const board = [...prev].map((row) => [...row]);
+  const longPressEvent = useLongPress(
+    () => {
+      setBoard((prev) => {
+        const board = [...prev].map((row) => [...row]);
 
-      board[rowIndex][columnIndex] = {
-        ...board[rowIndex][columnIndex],
-        state: "hidden",
-      };
+        board[rowIndex][columnIndex] = {
+          ...board[rowIndex][columnIndex],
+          state: "hidden",
+        };
 
-      return board;
-    });
-  });
+        return board;
+      });
+    },
+    { isPreventDefault: false },
+  );
 
   switch (minesweeperState) {
     case "completed":
