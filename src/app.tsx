@@ -27,7 +27,7 @@ export const App: FunctionComponent = () => {
   return (
     <div className="mx-auto mb-16 max-w-4xl bg-white px-8">
       <div className="mt-16">
-        <h2 className="flex flex-col-reverse items-center justify-center gap-4 text-center text-5xl font-bold break-words break-keep md:flex-row">
+        <h2 className="flex flex-col-reverse items-center justify-center gap-4 text-center text-5xl/[1.1] font-bold break-words break-keep md:flex-row">
           マツボックリ
           <wbr />
           スイーパー
