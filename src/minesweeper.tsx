@@ -159,26 +159,6 @@ export const Minesweeper: FunctionComponent = () => {
           </label>
         </div>
 
-        {imageURL && (
-          <div className="relative mt-4 max-w-md overflow-hidden rounded-lg">
-            <img alt="" src={imageURL} className="h-auto w-full" />
-            {(minesweeperState === "gameOver" ||
-              minesweeperState === "completed") && (
-              <div className="pointer-events-none absolute top-0 left-0 h-full w-full">
-                {imageMines.map(([x, y], index) => (
-                  <div
-                    key={index}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 transform"
-                    style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
-                  >
-                    <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         <div className="flex w-full max-w-md flex-col items-center space-y-4">
           <div className="w-full text-center">
             <h3 className="mb-2 text-sm font-medium text-zinc-700">
@@ -230,6 +210,26 @@ export const Minesweeper: FunctionComponent = () => {
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-zinc-600"
             />
           </div>
+
+           {imageURL && (
+          <div className="relative mt-4 max-w-md overflow-hidden rounded-lg">
+            <img alt="" src={imageURL} className="h-auto w-full" />
+            {(minesweeperState === "gameOver" ||
+              minesweeperState === "completed") && (
+              <div className="pointer-events-none absolute top-0 left-0 h-full w-full">
+                {imageMines.map(([x, y], index) => (
+                  <div
+                    key={index}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 transform"
+                    style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
+                  >
+                    <span className="inline-flex items-center justify-center rounded-full bg-red-500 p-1.5 shadow-sm ring-2 ring-red-600" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         </div>
       </div>
 
