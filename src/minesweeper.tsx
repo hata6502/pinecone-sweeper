@@ -141,7 +141,7 @@ export const Minesweeper: FunctionComponent = () => {
     <div className="mx-auto flex max-w-2xl flex-col items-center space-y-8">
       <div className="text-center">
         <p className="text-zinc-600">
-          マツボックリが落ちてる写真をもとに爆弾🌰を配置します。
+          マツボックリが落ちてる写真をもとに爆弾🌰を配置するマインスイーパー。
         </p>
       </div>
 
