@@ -1,6 +1,12 @@
 import { ShareIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { ChangeEventHandler, FunctionComponent } from "react";
 
 import { Cell } from "./cell";
@@ -48,6 +54,7 @@ export const Minesweeper: FunctionComponent = () => {
   const started = Boolean(progress);
 
   const [operating, setOperating] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const reset = useCallback(async () => {
     const size = {
@@ -132,6 +139,14 @@ export const Minesweeper: FunctionComponent = () => {
     setOperating(false);
   };
 
+  const handleImageButtonClick = () => {
+    if (!imageInputRef.current) {
+      throw new Error("imageInputRef is null");
+    }
+
+    imageInputRef.current.click();
+  };
+
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center space-y-8">
       <div className="text-center">
@@ -146,12 +161,19 @@ export const Minesweeper: FunctionComponent = () => {
             type="file"
             accept="image/*"
             onChange={handleImageInputChange}
-            id="image-upload"
+            ref={imageInputRef}
             className="hidden"
           />
-          <label htmlFor="image-upload" className={buttonClassNames.secondary}>
+          <button
+            type="button"
+            onClick={handleImageButtonClick}
+            className={clsx(
+              buttonClassNames.primary,
+              !imageURL && "animate-pulse",
+            )}
+          >
             写真を選択
-          </label>
+          </button>
         </div>
 
         <div className="flex w-full max-w-md flex-col items-center space-y-4">
