@@ -21,7 +21,7 @@ const faqs = [
 ];
 
 const tweetIDsURL =
-  "https://script.google.com/macros/s/AKfycbx1Lec0RXfLou1Ixz3-hg6lFHoQdkTDSCFhtYIwQ9_OyWx36f3JYIxGdia9kLdx4DYe/exec";
+  "https://script.google.com/macros/s/AKfycbyK3emdpEBLSHMZt9Osw_U7fvCvToYBrpyKQDQ4-uxmeWZbwBb3BybuT0h824ZEavUjuA/exec";
 
 export const App: FunctionComponent = () => {
   return (
