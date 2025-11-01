@@ -6,7 +6,7 @@ import { SWRConfig } from "swr";
 
 import { App } from "./app";
 
-Clarity.init("r8tfd2woc6");
+Clarity.init("tzb0jilbb4");
 
 const Index: FunctionComponent = () => (
   <StrictMode>
