@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     title: "超重量級おふとん",
-    url: "https://scrapbox.io/hata6502/%E8%B6%85%E9%87%8D%E9%87%8F%E7%B4%9A%E3%81%8A%E3%81%B5%E3%81%A8%E3%82%93",
+    url: "https://help.hata6502.com/--6470dc464b8266001bd7d97b",
   },
 ];
 
@@ -33,10 +33,6 @@ export const App: FunctionComponent = () => {
           スイーパー
           <img src="favicon.png" className="inline w-20" />
         </h2>
-      </div>
-
-      <div className="mt-16">
-        <Minesweeper />
       </div>
 
       <Suspense>
