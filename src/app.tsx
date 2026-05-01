@@ -35,11 +35,9 @@ export const App: FunctionComponent = () => {
         </h2>
       </div>
 
-      <Suspense>
-        <div className="mt-16">
-          <Tweets />
-        </div>
-      </Suspense>
+      <div className="mt-16">
+        <Minesweeper />
+      </div>
 
       <div className="mt-16">
         <div className="divide-y divide-gray-900/10">
